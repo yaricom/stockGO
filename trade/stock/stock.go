@@ -34,7 +34,7 @@ func (s Stock) CanBeSold(history[]float64) bool {
 		return false
 	}
 	delta := s.bidMargin()
-	return s.BidPrice < s.MaxPrice - delta
+	return s.BidPrice < s.CurrPrice - delta
 }
 
 func (s Stock) CanBeBought(history[]float64) bool {
