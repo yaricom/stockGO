@@ -12,7 +12,7 @@ const (
 	BUY
 )
 // The money spend factor
-const spendFactor = 0.8
+const spendFactor = 1.0//0.8
 // The days left threshold
 const daysLeftTheshold = 5
 
@@ -94,17 +94,14 @@ func (t *TradeEngine) Trade(trades []TradeInput, money float64, daysLeft int) ([
 		orders = append(orders, order)
 	}
 
-	moneyToSpent := money * rand.Float64() * spendFactor
+	moneyToSpent := money * spendFactor // * rand.Float64()
 	if moneyToSpent == 0 { moneyToSpent = money * spendFactor }
 	ordersByStock := make(map[string]TradeOrder)
 	for moneyToSpent > 0 && daysLeft > daysLeftTheshold {
-		permIndxs := rand.Perm(len(trades)) // permutation of stock indexes to give chance to every stock randomly
+		permIndxs := rand.Perm(len(toBuy)) // permutation of stock indexes to give chance to every stock randomly
 		buyFailed := 0
 		for _, indx := range(permIndxs) {
-			st, ok := t.stocks[trades[indx].StockName]
-			if !ok {
-				return nil, errors.New("BUY| Stock not found: " + trades[indx].StockName)
-			}
+			st := toBuy[indx]
 			if st.CurrPrice < moneyToSpent {
 				// buy
 				st.BidPrice = st.CurrPrice
@@ -125,7 +122,7 @@ func (t *TradeEngine) Trade(trades []TradeInput, money float64, daysLeft int) ([
 			}
 		}
 
-		if buyFailed == len(trades) {
+		if buyFailed == len(toBuy) {
 			break // failed to buy any stock - not enough money left
 		}
 	}
