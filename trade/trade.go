@@ -19,7 +19,7 @@ const daysLeftTheshold = 5
 // The trade input for particular stock
 type TradeInput struct {
 	StockName string
-	History float32
+	History []float64
 	Owned int
 }
 
@@ -42,7 +42,7 @@ func New() TradeEngine {
 	}
 }
 
-func (t *TradeEngine) addStock(name string, priceHistory float32, owned int) error {
+func (t *TradeEngine) addStock(name string, priceHistory[] float64, owned int) error {
 	if _, ok := t.stocks[name]; ok {
 		return errors.New("Stock already registered: " + name)
 	}
@@ -53,7 +53,7 @@ func (t *TradeEngine) addStock(name string, priceHistory float32, owned int) err
 	return nil
 }
 
-func (t *TradeEngine) Trade(trades []TradeInput, money float32, daysLeft int) ([]TradeOrder, error) {
+func (t *TradeEngine) Trade(trades []TradeInput, money float64, daysLeft int) ([]TradeOrder, error) {
 	// add / update stocks
 	for _,tr := range trades {
 		if s, ok := t.stocks[tr.StockName]; ok {
@@ -81,7 +81,7 @@ func (t *TradeEngine) Trade(trades []TradeInput, money float32, daysLeft int) ([
 	// create trade orders
 	var orders []TradeOrder
 	for _, s := range toSell {
-		amount := int((s.Owned + 1) * (rand.Float32() + 1.0) / 2.0) // owned * [0.5, 1]
+		amount := int(float64(s.Owned + 1) * (rand.Float64() + 1.0) / 2.0) // owned * [0.5, 1]
 		if daysLeft < daysLeftTheshold {
 			// try to sell everything at best possible prices when remaining days is bellow threshold
 			amount = s.Owned
@@ -94,7 +94,7 @@ func (t *TradeEngine) Trade(trades []TradeInput, money float32, daysLeft int) ([
 		orders = append(orders, order)
 	}
 
-	moneyToSpent := money * rand.Float32() * spendFactor
+	moneyToSpent := money * rand.Float64() * spendFactor
 	if moneyToSpent == 0 { moneyToSpent = money * spendFactor }
 	ordersByStock := make(map[string]TradeOrder)
 	for moneyToSpent > 0 && daysLeft > daysLeftTheshold {
@@ -116,10 +116,10 @@ func (t *TradeEngine) Trade(trades []TradeInput, money float32, daysLeft int) ([
 						Amount: 1,
 						Operation: BUY,
 					}
-					ordersByStock[st.Name] = order
 				} else {
 					order.Amount += 1
 				}
+				ordersByStock[st.Name] = order
 			} else {
 				buyFailed += 1
 			}
