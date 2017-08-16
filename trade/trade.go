@@ -13,6 +13,8 @@ const (
 )
 // The money spend factor
 const spendFactor = 0.8
+// The days left threshold
+const daysLeftTheshold = 5
 
 // The trade input for particular stock
 type TradeInput struct {
@@ -80,6 +82,10 @@ func (t *TradeEngine) Trade(trades []TradeInput, money float32, daysLeft int) ([
 	var orders []TradeOrder
 	for _, s := range toSell {
 		amount := int((s.Owned + 1) * (rand.Float32() + 1.0) / 2.0) // owned * [0.5, 1]
+		if daysLeft < daysLeftTheshold {
+			// try to sell everything at best possible prices when remaining days is bellow threshold
+			amount = s.Owned
+		}
 		order := TradeOrder {
 			StockName: s.Name,
 			Amount: amount,
@@ -91,7 +97,7 @@ func (t *TradeEngine) Trade(trades []TradeInput, money float32, daysLeft int) ([
 	moneyToSpent := money * rand.Float32() * spendFactor
 	if moneyToSpent == 0 { moneyToSpent = money * spendFactor }
 	ordersByStock := make(map[string]TradeOrder)
-	for moneyToSpent > 0 {
+	for moneyToSpent > 0 && daysLeft > daysLeftTheshold {
 		permIndxs := rand.Perm(len(trades)) // permutation of stock indexes to give chance to every stock randomly
 		buyFailed := 0
 		for _, indx := range(permIndxs) {
