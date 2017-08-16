@@ -72,7 +72,7 @@ func (s *Stock) Update(history[]float64, owned int) {
 }
 
 func (s Stock) bidMargin() float64 {
-	margin := rand.Float64() * marginMultiplier
+	margin := marginMultiplier * (rand.Float64() + 1.0) / 2.0
 	if margin == 0 { margin = marginMultiplier }
 	return (s.MaxPrice - s.MinPrice) * margin
 }
