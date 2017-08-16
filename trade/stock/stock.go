@@ -13,12 +13,12 @@ const marginMultiplier = 0.25
 // stock
 type Stock struct {
 	Name string
-	MinPrice float32
-	MinPriceHistorical float32
-	MaxPrice float32
-	MaxPriceHistorical float32
-	CurrPrice float32
-	BidPrice float32
+	MinPrice float64
+	MinPriceHistorical float64
+	MaxPrice float64
+	MaxPriceHistorical float64
+	CurrPrice float64
+	BidPrice float64
 	Owned int
 }
 
@@ -29,7 +29,7 @@ func New(name string) Stock {
 	}
 }
 
-func (s Stock) CanBeSold(history[]float32) bool {
+func (s Stock) CanBeSold(history[]float64) bool {
 	if s.Owned == 0 {
 		return false
 	}
@@ -37,7 +37,7 @@ func (s Stock) CanBeSold(history[]float32) bool {
 	return s.BidPrice < s.MaxPrice - delta
 }
 
-func (s Stock) CanBeBought(history[]float32) bool {
+func (s Stock) CanBeBought(history[]float64) bool {
 	if s.CurrPrice < s.MinPriceHistorical {
 		return true
 	}
@@ -48,7 +48,7 @@ func (s Stock) CanBeBought(history[]float32) bool {
 	return s.CurrPrice < s.MinPrice + delta
 }
 
-func (s *Stock) Update(history[]float32, owned int) {
+func (s *Stock) Update(history[]float64, owned int) {
 	// fill values
 	s.CurrPrice = history[len(history) - 1]
 	s.Owned = owned
@@ -56,10 +56,10 @@ func (s *Stock) Update(history[]float32, owned int) {
 	// update min /max
 	sort.Float64s(history)// sort in increasing order
 	min := history[0]
-	if s.MinPrice > min {
+	if s.MinPrice > min || s.MinPrice == 0 {
 		s.MinPrice = min
 	}
-	if s.MinPriceHistorical > min {
+	if s.MinPriceHistorical > min || s.MinPriceHistorical == 0 {
 		s.MinPriceHistorical = min
 	}
 	max := history[len(history) - 1]
@@ -71,8 +71,8 @@ func (s *Stock) Update(history[]float32, owned int) {
 	}
 }
 
-func (s Stock) bidMargin() float32 {
-	margin := rand.Float32() * marginMultiplier
+func (s Stock) bidMargin() float64 {
+	margin := rand.Float64() * marginMultiplier
 	if margin == 0 { margin = marginMultiplier }
 	return (s.MaxPrice - s.MinPrice) * margin
 }
